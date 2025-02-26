@@ -1,4 +1,8 @@
-from langchain_nvidia_ai_endpoints import ChatNVIDIA
+from langchain_nvidia_ai_endpoints import (
+    register_model, 
+    Model, 
+    ChatNVIDIA
+)
 from typing import List, Dict, Any, Optional, Union
 import logging
 import ujson as json
@@ -146,12 +150,22 @@ class LLMManager:
             raise ValueError(f"Unknown model key: {model_key}")
         if model_key not in self._llm_cache:
             config = self.model_configs[model_key]
-            self._llm_cache[model_key] = ChatNVIDIA(
+
+            register_model(Model(
+                id=config.name, 
+                model_type="chat", 
+                client="ChatNVIDIA", 
+                endpoint=config.api_base
+            ))
+
+            llm = ChatNVIDIA(
                 model=config.name,
-                base_url=config.api_base,
                 nvidia_api_key=self.api_key,
                 max_tokens=None,
             )
+
+            self._llm_cache[model_key] = llm
+
         return self._llm_cache[model_key]
 
     def query_sync(

@@ -28,6 +28,18 @@ mock_config = OpenTelemetryConfig(
 )
 mock_telemetry.initialize(mock_config, mock_app)
 
+from glob import glob
+def expand_path(p):
+    p= os.path.expandvars(os.path.expanduser(p))
+    return glob(p,resursive=True)[0]
+
+def get_llm_manager():
+
+    return LLMManager(
+        api_key=os.getenv("NVIDIA_API_KEY"),
+        telemetry=mock_telemetry,
+        config_path='models.json'
+    )
 
 async def test_basic_queries():
     """
@@ -51,7 +63,7 @@ async def test_basic_queries():
     """
     print("\n=== Testing Basic Queries ===")
 
-    manager = LLMManager(api_key=os.getenv("NVIDIA_API_KEY"), telemetry=mock_telemetry)
+    manager = get_llm_manager()
 
     # Test sync query
     print("\nTesting sync query...")
@@ -104,7 +116,7 @@ async def test_parallel_processing():
     """
     print("\n=== Testing Parallel Processing ===")
 
-    manager = LLMManager(api_key=os.getenv("NVIDIA_API_KEY"), telemetry=mock_telemetry)
+    manager = get_llm_manager()
 
     questions = ["What is Python?", "What is JavaScript?", "What is Rust?"]
 
@@ -158,7 +170,7 @@ async def test_json_schema():
     """
     print("\n=== Testing JSON Schema ===")
 
-    manager = LLMManager(api_key=os.getenv("NVIDIA_API_KEY"), telemetry=mock_telemetry)
+    manager = get_llm_manager()
 
     # Define a schema for a person's details
     schema = {
@@ -206,7 +218,7 @@ async def test_streaming():
     """
     print("\n=== Testing Streaming ===")
 
-    manager = LLMManager(api_key=os.getenv("NVIDIA_API_KEY"), telemetry=mock_telemetry)
+    manager = get_llm_manager()
 
     # Test sync streaming
     print("\nTesting sync streaming...")
@@ -260,7 +272,7 @@ async def test_json_streaming():
     """
     print("\n=== Testing JSON Streaming ===")
 
-    manager = LLMManager(api_key=os.getenv("NVIDIA_API_KEY"), telemetry=mock_telemetry)
+    manager = get_llm_manager()
 
     # Define a simpler schema
     schema = {
@@ -345,8 +357,14 @@ async def main_test():
 
 
 if __name__ == "__main__":
+
+
+    print('\n=================== Begin pdf2pod llm_manager tests ========================\n')
+
     # Ensure NVIDIA_API_KEY is set
     if not os.getenv("NVIDIA_API_KEY"):
         print("Error: NVIDIA_API_KEY environment variable not set")
     else:
         asyncio.run(main_test())
+
+    print('\n=================== End pdf2pod llm_manager tests ========================\n')
